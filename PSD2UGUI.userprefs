@@ -1,0 +1,13 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace />
+  <MonoDevelop.Ide.Workbench ActiveDocument="../../HeroProjects/trunk/Assets/Scripts/Battle/Characters/Soldiers/BattleCharacterController.cs">
+    <Files>
+      <File FileName="../../HeroProjects/trunk/Assets/Scripts/Base System/Communication/Channel/SoketClient.cs" Line="294" Column="1" />
+      <File FileName="../../HeroProjects/trunk/Assets/Scripts/Battle/Characters/Soldiers/BattleCharacterController.cs" Line="197" Column="5" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
