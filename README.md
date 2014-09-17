@@ -1,8 +1,3 @@
-Convert PSD file to Unity using material.  
-
-* Exporte XML and png files.
-* Import to Unity
-
 Unity在4.6版本中将要发布新的UI系统UGUI, 关于UGUI的介绍,请查看Overview of the New UI System。
 
 一般来说，游戏UI的制作步骤为:  
@@ -21,7 +16,7 @@ Unity在4.6版本中将要发布新的UI系统UGUI, 关于UGUI的介绍,请查�
 其中，PSD中的”组”与”层”的组织和命名需要遵循一定的规范。组织规范定义了UI的结构，命名规范定义了UI的组件类型（包括：Button、Label、Image、ScrollView、ListView等）和参数。从Photoshop导出对应配置是使用Photoshop支持的ExtendScript，通过遍历PSD，生成UI的结构并使用XML保存，同时也会导出相应的图片资源。
 
 PSD预览与对应的层级结构
-
+{% image left http://ariequ.github.io/images/0916_2.png %}
 
 
 资源复用问题
