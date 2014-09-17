@@ -15,7 +15,8 @@ Unity在4.6版本中将要发布新的UI系统UGUI, 关于UGUI的介绍,请查�
 2. 使用Unity读取配置，使用图片资源生成对应的UI.  
 其中，PSD中的”组”与”层”的组织和命名需要遵循一定的规范。组织规范定义了UI的结构，命名规范定义了UI的组件类型（包括：Button、Label、Image、ScrollView、ListView等）和参数。从Photoshop导出对应配置是使用Photoshop支持的ExtendScript，通过遍历PSD，生成UI的结构并使用XML保存，同时也会导出相应的图片资源。
 
-PSD预览与对应的层级结构
+PSD预览与对应的层级结构  
+
 ![预览图](http://ariequ.github.io/images/0916_2.png)
 
 资源复用问题
