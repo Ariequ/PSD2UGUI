@@ -1,9 +1,10 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace />
-  <MonoDevelop.Ide.Workbench ActiveDocument="../../HeroProjects/trunk/Assets/Scripts/Battle/Characters/Soldiers/BattleCharacterController.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Editor/PSDImporter.cs">
     <Files>
-      <File FileName="../../HeroProjects/trunk/Assets/Scripts/Base System/Communication/Channel/SoketClient.cs" Line="294" Column="1" />
-      <File FileName="../../HeroProjects/trunk/Assets/Scripts/Battle/Characters/Soldiers/BattleCharacterController.cs" Line="197" Column="5" />
+      <File FileName="Assets/Editor/PSDImporter.cs" Line="257" Column="113" />
+      <File FileName="Assets/Editor/PSDUI.cs" Line="4" Column="24" />
+      <File FileName="Assets/PSDExportMaterials/HeroCommon/HeroCommon.xml" Line="64" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

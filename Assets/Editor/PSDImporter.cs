@@ -20,7 +20,6 @@ public class CommonPSDImporter : Editor
     //--------------------------------------------------------------------------
     private static string baseFilename;
     private static string baseDirectory;
-    private static string relativeResoucesDirectory;
 
     [MenuItem("Assets/Create/Import PSD ...")]
     static public void ImportHogSceneMenuItem ()
@@ -29,6 +28,78 @@ public class CommonPSDImporter : Editor
         if ((inputFile != null) && (inputFile != "") && (inputFile.StartsWith (Application.dataPath)))
         {
             ImportPSDUI (inputFile);
+        }
+    }
+
+    static private void ImportPSDUI (string assetPath)
+    {
+        // before we do anything else, try to deserialize the input file and be sure it's actually the right kind of file
+        PSDUI psdUI = (PSDUI)DeserializeXml (assetPath, typeof(PSDUI));
+
+        Debug.Log(psdUI.psdSize.width + "=====psdSize======" + psdUI.psdSize.height);
+
+        if (psdUI == null)
+        {
+            Debug.Log ("The file " + assetPath + " wasn't able to generate a PSDUI.");
+            return;
+        }
+        
+        // next, we're going to be creating scenes, allow the user to save if they want
+        // see if user wants to save current scene, bail if they don't
+        if (EditorApplication.SaveCurrentSceneIfUserWantsTo () == false)
+        {
+            return;
+        }
+        
+        // cache some useful variables
+        baseFilename = Path.GetFileNameWithoutExtension (assetPath);
+        baseDirectory = "Assets/" + Path.GetDirectoryName (assetPath.Remove (0, Application.dataPath.Length + 1)) + "/";
+        
+        Debug.Log ("baseFilename " + baseFilename);
+        Debug.Log ("baseDirectory " + baseDirectory);      
+        
+        // if the scene already exists, delete it
+        string scenePath = baseDirectory + baseFilename + " Scene.unity";
+        if (File.Exists (scenePath) == true)
+        {
+            File.Delete (scenePath);
+            AssetDatabase.Refresh ();
+        }
+        // now create a new scene
+        EditorApplication.NewScene ();
+        
+        for (int layerIndex = 0; layerIndex < psdUI.layers.Length; layerIndex++)
+        {
+            ImportLayer (psdUI.layers [layerIndex], baseDirectory);
+        }
+        
+        Canvas temp = Resources.Load (PSDImporterConst.PREFAB_PATH_CANVAS, typeof(Canvas)) as Canvas;
+        Canvas canvas = GameObject.Instantiate (temp) as Canvas;
+
+        ReferenceResolution resolution = canvas.GetComponent<ReferenceResolution>();
+        resolution.resolution = new Vector2(psdUI.psdSize.width, psdUI.psdSize.height);
+        
+        GameObject obj = new GameObject (baseFilename);
+        obj.transform.parent = canvas.transform;
+        
+        for (int layerIndex = 0; layerIndex < psdUI.layers.Length; layerIndex++)
+        {
+            DrawLayer (psdUI.layers [layerIndex], obj);
+        }
+        
+        canvas.renderMode = RenderMode.Overlay;
+        
+        AssetDatabase.Refresh ();
+        EditorApplication.SaveScene (scenePath);
+        
+        if (baseFilename.Contains ("Common"))
+        {
+            for (int layerIndex = 0; layerIndex < psdUI.layers.Length; layerIndex++)
+            {
+                MoveAsset (psdUI.layers [layerIndex], baseDirectory);
+            }
+            
+            AssetDatabase.Refresh ();
         }
     }
 
@@ -76,6 +147,9 @@ public class CommonPSDImporter : Editor
         }
     }
 
+    //------------------------------------------------------------------
+    //when it's a common psd, then move the asset to special folder
+    //------------------------------------------------------------------
     static private void MoveAsset (PSDUI.Layer layer, string baseDirectory)
     {
         if (layer.images != null)
@@ -93,7 +167,7 @@ public class CommonPSDImporter : Editor
                 System.IO.Directory.CreateDirectory (newPath);
             }
 
-            Debug.Log("creating new folder : " + newPath);
+            Debug.Log ("creating new folder : " + newPath);
 
             AssetDatabase.Refresh ();
 
@@ -107,8 +181,8 @@ public class CommonPSDImporter : Editor
                     string texturePathName = baseDirectory + layer.images [imageIndex].name + PSDImporterConst.PNG_SUFFIX;
                     string targetPathName = newPath + layer.images [imageIndex].name + PSDImporterConst.PNG_SUFFIX;
 
-                    Debug.Log(texturePathName);
-                    Debug.Log(targetPathName);
+                    Debug.Log (texturePathName);
+                    Debug.Log (targetPathName);
 
                     AssetDatabase.MoveAsset (texturePathName, targetPathName);
                 }
@@ -138,15 +212,14 @@ public class CommonPSDImporter : Editor
                 if (image.imageSource == PSDUI.ImageSource.Custom)
                 {
                     Image pic = Resources.Load (PSDImporterConst.PREFAB_PATH_IMAGE, typeof(Image)) as Image;
-//                    Sprite sprite = Resources.Load (relativeResoucesDirectory + image.name, typeof(Sprite)) as Sprite;
 
-					string assetPath = baseDirectory + image.name + PSDImporterConst.PNG_SUFFIX;
-					Sprite sprite =  AssetDatabase.LoadAssetAtPath(assetPath, typeof(Sprite)) as Sprite;
+                    string assetPath = baseDirectory + image.name + PSDImporterConst.PNG_SUFFIX;
+                    Sprite sprite = AssetDatabase.LoadAssetAtPath (assetPath, typeof(Sprite)) as Sprite;
 
-					if (sprite == null)
-					{
-						Debug.Log("loading asset at path: " + baseDirectory + image.name);
-					}
+                    if (sprite == null)
+                    {
+                        Debug.Log ("loading asset at path: " + baseDirectory + image.name);
+                    }
 
                     pic.sprite = sprite;
                     
@@ -158,23 +231,36 @@ public class CommonPSDImporter : Editor
                     rectTransform.sizeDelta = new Vector2 (image.size.width, image.size.height);
                     rectTransform.anchoredPosition = new Vector2 (image.position.x, image.position.y);
                 }
-                else if (image.imageSource == PSDUI.ImageSource.Common)
+                else
+                if (image.imageSource == PSDUI.ImageSource.Common)
                 {
                     if (image.imageType == PSDUI.ImageType.Label)
                     {
-                        Text text = Resources.Load(PSDImporterConst.PREFAB_PATH_TEXT, typeof(Text)) as Text;
+                        Text text = Resources.Load (PSDImporterConst.PREFAB_PATH_TEXT, typeof(Text)) as Text;
 
-                        Text myText = GameObject.Instantiate(text) as Text;
-                        Debug.Log("Label Color : " + image.arguments[0]);
+                        Text myText = GameObject.Instantiate (text) as Text;
+                        Debug.Log ("Label Color : " + image.arguments [0]);
 //                        myText.color = image.arguments[0];
 //                        myText.font = image.arguments[1];
-                        Debug.Log("fontSize : " + image.arguments[2]);
+                        Debug.Log ("fontSize : " + image.arguments [2]);
                        
-                        myText.fontSize = System.Convert.ToInt32(image.arguments[2]);
-                        myText.text = image.arguments[3];
+                        myText.fontSize = System.Convert.ToInt32 (image.arguments [2]);
+                        myText.text = image.arguments [3];
                         myText.transform.parent = obj.transform;
 
                         RectTransform rectTransform = myText.GetComponent<RectTransform> ();
+                        rectTransform.sizeDelta = new Vector2 (image.size.width, image.size.height);
+                        rectTransform.anchoredPosition = new Vector2 (image.position.x, image.position.y);
+                    }
+                    else if (image.imageType == PSDUI.ImageType.Texture)
+                    {
+                        Image pic = Resources.Load (PSDImporterConst.PREFAB_PATH_IMAGE, typeof(Image)) as Image;
+                        pic.sprite = null;
+                        Image myImage = GameObject.Instantiate (pic) as Image;
+                        myImage.name = image.name;
+                        myImage.transform.parent = obj.transform;
+
+                        RectTransform rectTransform = myImage.GetComponent<RectTransform> ();
                         rectTransform.sizeDelta = new Vector2 (image.size.width, image.size.height);
                         rectTransform.anchoredPosition = new Vector2 (image.position.x, image.position.y);
                     }
@@ -183,8 +269,8 @@ public class CommonPSDImporter : Editor
                         Image pic = Resources.Load (PSDImporterConst.PREFAB_PATH_IMAGE, typeof(Image)) as Image;
 
                         string commonImagePath = PSDImporterConst.COMMON_BASE_FOLDER + image.name.Replace (".", "/") + PSDImporterConst.PNG_SUFFIX;
-                        Debug.Log("==  CommonImagePath  ====" + commonImagePath);
-						Sprite sprite =  AssetDatabase.LoadAssetAtPath(commonImagePath, typeof(Sprite)) as Sprite;                     
+                        Debug.Log ("==  CommonImagePath  ====" + commonImagePath);
+                        Sprite sprite = AssetDatabase.LoadAssetAtPath (commonImagePath, typeof(Sprite)) as Sprite;                     
                         pic.sprite = sprite;
                         
                         Image myImage = GameObject.Instantiate (pic) as Image;
@@ -229,11 +315,9 @@ public class CommonPSDImporter : Editor
                 if (image.name.Contains ("normal"))
                 {
                     if (image.imageSource == PSDUI.ImageSource.Custom)
-                    {
-//                        Sprite sprite = Resources.Load (relativeResoucesDirectory + image.name, typeof(Sprite)) as Sprite;
-
-						string assetPath = baseDirectory + image.name + PSDImporterConst.PNG_SUFFIX;
-						Sprite sprite =  AssetDatabase.LoadAssetAtPath(assetPath, typeof(Sprite)) as Sprite;
+                    {                       
+                        string assetPath = baseDirectory + image.name + PSDImporterConst.PNG_SUFFIX;
+                        Sprite sprite = AssetDatabase.LoadAssetAtPath (assetPath, typeof(Sprite)) as Sprite;
                         button.image.sprite = sprite;
                         
                         RectTransform rectTransform = button.GetComponent<RectTransform> ();
@@ -251,14 +335,14 @@ public class CommonPSDImporter : Editor
         GridLayoutGroup gridLayoutGroup = GameObject.Instantiate (temp) as GridLayoutGroup;
         gridLayoutGroup.transform.parent = parent.transform;
 
-        gridLayoutGroup.padding = new RectOffset();
-        gridLayoutGroup.cellSize = new Vector2(System.Convert.ToInt32(layer.arguments[2]), System.Convert.ToInt32(layer.arguments[3]));
+        gridLayoutGroup.padding = new RectOffset ();
+        gridLayoutGroup.cellSize = new Vector2 (System.Convert.ToInt32 (layer.arguments [2]), System.Convert.ToInt32 (layer.arguments [3]));
 
         RectTransform rectTransform = gridLayoutGroup.GetComponent<RectTransform> ();
         rectTransform.sizeDelta = new Vector2 (layer.size.width, layer.size.height);
         rectTransform.anchoredPosition = new Vector2 (layer.position.x, layer.position.y);
 
-        int cellCount = System.Convert.ToInt32(layer.arguments[0]) * System.Convert.ToInt32(layer.arguments[1]);
+        int cellCount = System.Convert.ToInt32 (layer.arguments [0]) * System.Convert.ToInt32 (layer.arguments [1]);
         for (int cell = 0; cell < cellCount; cell++)
         {
             Image pic = Resources.Load (PSDImporterConst.PREFAB_PATH_IMAGE, typeof(Image)) as Image;
@@ -306,74 +390,7 @@ public class CommonPSDImporter : Editor
             break;
         }
     }
-    
-    static private void ImportPSDUI (string assetPath)
-    {
-        // before we do anything else, try to deserialize the input file and be sure it's actually the right kind of file
-        PSDUI psdUI = (PSDUI)DeserializeXml (assetPath, typeof(PSDUI));
-        if (psdUI == null)
-        {
-            Debug.Log ("The file " + assetPath + " wasn't able to generate a PSDUI.");
-            return;
-        }
-        
-        // next, we're going to be creating scenes, allow the user to save if they want
-        // see if user wants to save current scene, bail if they don't
-        if (EditorApplication.SaveCurrentSceneIfUserWantsTo () == false)
-        {
-            return;
-        }
-        
-        // cache some useful variables
-        baseFilename = Path.GetFileNameWithoutExtension (assetPath);
-        baseDirectory = "Assets/" + Path.GetDirectoryName (assetPath.Remove (0, Application.dataPath.Length + 1)) + "/";
-        relativeResoucesDirectory = baseDirectory.Remove (0, "Assets/Resources/".Length);
 
-        Debug.Log ("baseFilename " + baseFilename);
-        Debug.Log ("baseDirectory " + baseDirectory);      
-        
-        // if the scene already exists, delete it
-        string scenePath = baseDirectory + baseFilename + " Scene.unity";
-        if (File.Exists (scenePath) == true)
-        {
-            File.Delete (scenePath);
-            AssetDatabase.Refresh ();
-        }
-        // now create a new scene
-        EditorApplication.NewScene ();
-
-        for (int layerIndex = 0; layerIndex < psdUI.layers.Length; layerIndex++)
-        {
-            ImportLayer (psdUI.layers [layerIndex], baseDirectory);
-        }
-
-        Canvas temp = Resources.Load (PSDImporterConst.PREFAB_PATH_CANVAS, typeof(Canvas)) as Canvas;
-        Canvas canvas = GameObject.Instantiate (temp) as Canvas;
-
-        GameObject obj = new GameObject (baseFilename);
-        obj.transform.parent = canvas.transform;
-        
-        for (int layerIndex = 0; layerIndex < psdUI.layers.Length; layerIndex++)
-        {
-            DrawLayer (psdUI.layers [layerIndex], obj);
-        }
-
-        canvas.renderMode = RenderMode.Overlay;
-
-        AssetDatabase.Refresh ();
-        EditorApplication.SaveScene (scenePath);
-
-        if (baseFilename.Contains ("Common"))
-        {
-            for (int layerIndex = 0; layerIndex < psdUI.layers.Length; layerIndex++)
-            {
-                MoveAsset (psdUI.layers [layerIndex], baseDirectory);
-            }
-
-            AssetDatabase.Refresh ();
-        }
-    }
-    
     static private object DeserializeXml (string filePath, System.Type type)
     {
         object instance = null;

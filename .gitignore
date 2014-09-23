@@ -1,4 +1,34 @@
 
 Library/*
-*/.svn/*
+/.svn
+.svn/
 Assets/PSDExportMaterials/.svn/*
+Temp/*
+
+Assets/Editor/.svn/entries
+
+*.svn-base
+
+*.svn-base
+
+ProjectSettings/.svn/entries
+
+Assets/Resources/Prefabs/UI/.svn/entries
+
+Assets/Resources/Prefabs/.svn/entries
+
+Assets/Resources/.svn/entries
+
+*.svn-base
+
+Assets/PSDSource/.svn/text-base/HeroCommon.psd.svn-base
+
+Assets/PSDSource/.svn/text-base/Export PSDUI.jsx.svn-base
+
+Assets/PSDSource/.svn/entries
+
+Assets/PSDExportMaterials/.svn/entries
+
+Assets/Editor/.svn/text-base/PSDUI.cs.svn-base
+
+Assets/Editor/.svn/text-base/PSDImporter.cs.svn-base
