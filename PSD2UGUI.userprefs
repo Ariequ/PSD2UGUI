@@ -1,10 +1,9 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Editor/PSDImporter.cs">
     <Files>
       <File FileName="Assets/Editor/PSDImporter.cs" Line="257" Column="113" />
-      <File FileName="Assets/Editor/PSDUI.cs" Line="4" Column="24" />
-      <File FileName="Assets/PSDExportMaterials/HeroCommon/HeroCommon.xml" Line="64" Column="1" />
+      <File FileName="Assets/Editor/PSDUI.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
